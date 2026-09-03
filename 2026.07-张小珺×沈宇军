@@ -1,0 +1,1392 @@
+# 张小珺 × 沈宇军：2026 机器人原生基础模型——要点与清洗编辑版长篇访谈稿
+
+> 节目：《张小珺Jùn｜商业访谈录》第 147 期  
+> 标题：和蚂蚁灵波沈宇军聊：机器人原生基础模型、大脑和本体的关系、预训练与数据 Scale Up、老师汤晓鸥  
+> 发布时间：2026 年 7 月 22 日  
+> 时长：约 1 小时 53 分  
+> 嘉宾：沈宇军，蚂蚁灵波首席科学家，长期从事生成模型、表征学习、多模态与具身智能研究
+
+---
+
+# 一、文档说明
+
+本文不是原节目逐字稿，而是一份基于小宇宙官方节目页与时间轴、公开自动转写文本，以及 LingBot-VLA、LingBot-VA、LingBot-World、LingBot-Depth / Vision 等技术资料交叉核验后的编辑重构稿。
+
+这篇访谈有一个特殊点：沈宇军会把“具身原生”“数据 Scale Up”“空间智能”“因果预训练”“MoE”“六类模型”放在一条完整技术叙事里，但这些概念对应的是不同模型和不同研究阶段。为了避免整理后把所有东西误写成“一个模型里同时存在”，本文专门做了以下处理：
+
+1. 删除广告、寒暄、重复口语和与技术主线关系较弱的闲聊。
+2. 个人经历只保留与研究方法、生成模型、表征学习和创业路径直接相关的内容。
+3. 将“访谈观点”与“公开技术实现”分开，不把后续论文细节伪装成访谈原话。
+4. 对 LingBot-VLA 2.0 的数据规模、数据清洗、统一动作空间、MoE Action Expert 等，以公开技术报告为准。
+5. 对“百万小时”“GPT-1 Moment”“明年中”等表述，明确标记为沈宇军在 2026 年 7 月的个人预测；其中“明年中”对应约 2027 年中。
+6. 对 Physical Intelligence 与 Generalist 等公司的路线比较，保留其方法论意义，不把口语化对比写成绝对事实。
+7. 文末增加截至 2026 年 9 月的技术回看，以及从机器人数据质检视角的延伸分析。
+
+---
+
+# 二、整期访谈最值得记住的核心观点
+
+## 1. 沈宇军认为，2026 年具身智能仍然没有真正到 GPT-1 Moment
+
+这是整篇最核心的判断之一。
+
+在他看来，今天机器人已经有很多令人惊艳的 Demo，但还没有出现语言模型 GPT-1 那种明确的 Scale-up 信号：
+
+**Data ↑ → Model ↑ → Capability 持续、可预测增长。**
+
+原因不是机器人没有 Transformer，也不是模型参数还不够大，而是：
+
+**机器人数据还没有真正 Scale Up。**
+
+只要数据增长仍主要依赖：
+
+- 人工遥操作；
+- 特定本体；
+- 特定场景；
+- 特定任务；
+
+就很难复制互联网文本那种规模化过程。
+
+---
+
+## 2. “具身原生”不是把 VLM 再加一个 Action Head，而是从物理世界需求反推模型设计
+
+沈宇军回顾，2025 年团队仍然在尝试：
+
+**拿数字世界已经训练好的模型 → 修改 → 适配机器人。**
+
+到 2026 年，他们越来越认为这条路线“不够 work”。
+
+原因是物理世界本身有很多数字模型不天然处理的问题：
+
+- 实时性；
+- 连续动作；
+- 空间几何；
+- 因果时间结构；
+- 多本体；
+- 传感器状态；
+- 动作后果；
+- 物理交互。
+
+所以所谓“机器人原生基础模型”的核心不是一句品牌话术，而是：
+
+> 先问机器人真正需要什么，再决定网络、数据、预训练任务和表征方式，而不是从现成 VLM 结构出发强行补模块。
+
+---
+
+## 3. 他把“通用性”拆成三个维度：跨本体、跨场景、跨任务
+
+一个机器人模型是否 General，不应该只看：
+
+“会多少个任务”。
+
+还应同时看：
+
+### Cross-Embodiment
+换一个 Robot Body 后还能否利用已有知识。
+
+### Cross-Scene
+换房间、光照、背景、摆放后还能否工作。
+
+### Cross-Task
+是否能把已知技能组合到新任务。
+
+这三个维度共同决定机器人基础模型是否真的接近 Generalist。
+
+---
+
+## 4. 机器人真正缺的不只是语义智能，而是空间和物理智能
+
+数字世界 Foundation Model 很强的一部分能力来自：
+
+- Language；
+- Semantic Vision；
+- Internet Knowledge。
+
+但机器人必须回答额外问题：
+
+- 物体在哪里；
+- 距离多少；
+- 哪个方向能抓；
+- 深度关系怎样；
+- 动作后世界会怎么变化；
+- 自己身体与环境如何对应。
+
+因此“识别这是什么”与“知道怎样在三维空间里操作它”是两个层次。
+
+这也是 LingBot 同时布局：
+
+- Depth；
+- Vision；
+- VLA；
+- Video；
+- World；
+- VA
+
+等不同模型的原因之一。
+
+---
+
+## 5. 六类模型不是六个互不相干的产品，而是在补 Physical Intelligence 的不同缺口
+
+访谈中提到的技术版图大致可理解为：
+
+### LingBot-Depth
+补几何深度和空间结构。
+
+### LingBot-Vision
+补密集视觉理解、边界、形状与语义。
+
+### LingBot-VLA
+把视觉、语言、机器人状态映射到动作。
+
+### LingBot-Video
+学习物理世界的视频动态和生成能力。
+
+### LingBot-World
+做更长时、可交互的世界演化建模。
+
+### LingBot-VA
+把 Video 与 Action 放到统一的因果动态建模框架。
+
+它们共同服务于“物理世界模型能力”，但不能简单理解成六个模块已经被完整拼进一个单体网络。
+
+---
+
+## 6. 2025 年团队押注“传感器原生”，2026 年进一步转向“具身原生”
+
+沈宇军认为，机器人模型真正的输入不应该只是：
+
+**RGB Image + Text。**
+
+真实机器人还有：
+
+- Depth；
+- 多 Camera；
+- Proprioception；
+- Action History；
+- Robot State；
+- 不同 Sensor Geometry。
+
+因此团队最早的重要 Bet 之一，是从真实传感器信息出发构建模型。
+
+随后又进一步认识到：
+
+仅仅“多加几种 Sensor Token”还不够。
+
+整个预训练目标、时序结构和数据分布都应该针对 Physical Agent 重做。
+
+---
+
+## 7. 数据准备本身可能比模型 Architecture 更容易决定一轮预训练成败
+
+沈宇军反复强调，Pre-training 不只是“准备很多 Episode 然后开跑”。
+
+真正困难的是：
+
+- 数据从哪里来；
+- 怎么分任务；
+- 如何覆盖不同本体；
+- 如何做 Cleaning；
+- 如何做 Annotation；
+- 如何统一 Action Space；
+- 如何避免低质量轨迹淹没训练。
+
+这与语言模型时代“数据工程决定基座能力”的经验很类似，但机器人数据更复杂，因为每条轨迹同时包含：
+
+- 多路视频；
+- 时序动作；
+- Robot State；
+- 本体语义；
+- 任务标签；
+- 物理执行质量。
+
+---
+
+## 8. LingBot-VLA 从 v1 到 v2 的一个核心变化，就是数据规模与本体多样性继续扩大
+
+公开资料显示：
+
+### LingBot-VLA v1
+- 约 20,000 小时真实机器人数据；
+- 9 类双臂配置；
+- 约 4B 规模模型。
+
+### LingBot-VLA 2.0
+- 约 60,000 小时预训练数据；
+- 其中约 50,000 小时机器人轨迹；
+- 约 10,000 小时第一人称人类视频；
+- 覆盖 20 种机器人配置。
+
+这仍远小于沈宇军访谈里设想的“百万小时级”，但已经显示团队确实在持续押注 Data Scale。
+
+---
+
+## 9. LingBot-VLA 2.0 的 50,000 小时机器人数据，并不是简单“采到多少就全用多少”
+
+技术报告披露：
+
+团队实际收集约 **90,000 小时**机器人轨迹，经过多阶段过滤后保留约 **50,000 小时**用于训练。
+
+也就是说，原始数据中相当大比例被过滤。
+
+这本身就说明：
+
+**Robot Data Scale ≠ Raw Hours Scale。**
+
+真正有用的是：
+
+**Qualified / Diverse / Aligned Hours。**
+
+---
+
+## 10. 机器人数据质检已经开始从“人工听看”走向多层自动规则
+
+LingBot-VLA 2.0 公开的数据 QC 里包括：
+
+- 速度 / 加速度 / jerk 统计；
+- Z-score 异常检测；
+- 近静止轨迹过滤；
+- Robot URDF 投影到图像后检查状态与视频错位；
+- 模糊；
+- 遮挡；
+- 丢帧；
+- 多视角不同步；
+- 机器人状态异常。
+
+这说明具身数据质量已经不只是：
+
+“这个 Episode 成功没成功？”
+
+而是一套多模态时空一致性问题。
+
+---
+
+## 11. 人类第一人称视频也需要非常严格的质检，不是“有手的视频都算 Human Data”
+
+LingBot-VLA 2.0 对 Egocentric Human Video 的处理包括：
+
+- 先从约 20,000 小时候选中筛选；
+- 保留约 10,000 小时；
+- 使用 VLM 预筛是否真的存在第一人称 Manipulation；
+- SLAM 重建；
+- Hand Pose Estimation；
+- 检查手覆盖率；
+- 检查 SLAM 异常加速度；
+- 检查 Hand Trajectory 跳变；
+- 检查生理约束。
+
+因此 Human Video 的难题不是“网上视频够不够多”，而是：
+
+**能否把视频变成与机器人学习对齐的、可信的运动和任务信号。**
+
+---
+
+## 12. “机器人数据没有 Scale”不仅是量不足，也包括 Action Space 仍高度碎片化
+
+不同机器人可能拥有：
+
+- 机械臂关节；
+- End-effector Pose；
+- Gripper；
+- Dexterous Hand；
+- Waist；
+- Head；
+- Mobile Base。
+
+如果每种本体使用自己的 Action Schema，跨本体预训练很难真正成立。
+
+LingBot-VLA 2.0 将多种机器人动作映射到统一的 **55 维 canonical representation**。
+
+这类统一动作语义，是 Cross-Embodiment Scaling 的基础设施之一。
+
+---
+
+## 13. MoE 在机器人中的意义，不只是“省算力”，也可能对应动作与本体异质性
+
+公开 VLA 2.0 报告在 Action Expert 中采用 Token-level Sparse MoE。
+
+机器人任务天然异质：
+
+- 不同本体；
+- 不同 Action Channel；
+- 不同技能；
+- 不同运动分布。
+
+MoE 提供了一种可能：
+
+共享统一基础表示，同时允许不同 Token / Motion Pattern 选择不同 Expert。
+
+所以机器人 MoE 的价值不仅是 LLM 里的 FLOPs Efficiency，也可能帮助处理 Physical Heterogeneity。
+
+---
+
+## 14. 沈宇军强调“因果/单向时序”，本质上是机器人实时执行要求模型尊重 Action → Future 的时间方向
+
+数字世界很多表示学习模型可以利用双向 Context。
+
+但机器人在线执行时：
+
+- 当前只能看到过去；
+- Action 会影响未来；
+- Future 不能反向泄露到当前决策。
+
+因此具身模型需要更明确的 Temporal Causality。
+
+LingBot-VA 的公开路线也体现了这点：
+
+**Video + Action → Causal Dynamics / Future Prediction。**
+
+这与单纯静态视觉表征明显不同。
+
+---
+
+## 15. LingBot-VA 更接近“动作条件世界模型”，而不只是视频生成器
+
+LingBot-VA 把：
+
+- 视频状态；
+- Action
+
+共同放入因果生成框架。
+
+其目标不是只回答：
+
+“未来画面可能长什么样？”
+
+而是：
+
+**在给定动作条件下，未来怎样变化。**
+
+这更接近机器人语境中的 World Model，因为 Action 是因果干预的一部分。
+
+---
+
+## 16. “世界模型”与“VLA”在团队内部并不是二选一路线
+
+VLA 负责：
+
+**Observation / Language / State → Action。**
+
+World / VA 类模型更偏：
+
+**State + Action → Future State。**
+
+一个用于 Policy。
+
+一个用于 Dynamics / Prediction。
+
+长期系统很可能需要二者互相提供：
+
+- Representation；
+- Planning Signal；
+- Synthetic Experience；
+- Future Prediction。
+
+所以“VLA 还是 World Model”本身可能是假二选一。
+
+---
+
+## 17. 机器人更深层的智能还需要 Human Interaction，而不仅是离线 Dataset
+
+沈宇军认为，真正走向复杂 General Intelligence 后，机器人必须和人持续互动。
+
+原因包括：
+
+- 人的意图并不总能一次说清；
+- 任务偏好具有长期性；
+- 环境是开放的；
+- 很多价值判断没有固定标签；
+- 机器人需要在实际协作里学会“怎么做人类想要的助手”。
+
+这与 2026 年其他团队从静态 Demonstration 转向 Deployment Experience 的趋势一致。
+
+---
+
+## 18. 他把“随机初始位置适应能力”视作比固定 Demo 更值得关注的泛化迹象
+
+机器人 Demo 很容易通过固定 Initial State 做得漂亮。
+
+真正有意义的进步之一，是：
+
+- 物体随机摆放；
+- 起始姿态变化；
+- 局部遮挡；
+- 新组合
+
+以后，Policy 仍能找到正确操作路径。
+
+这种“状态空间扩大”比重复某条成功轨迹更接近 Generalization。
+
+---
+
+## 19. 沈宇军认为，具身数据最终至少需要百万小时级，今天仍差一个数量级以上
+
+他的个人判断是：
+
+真正形成类似语言模型 Pre-training 的 Scale Effect，可能需要：
+
+**Million-hour-level Embodied Data。**
+
+截至访谈时，公开 LingBot-VLA 2.0 是 60,000 小时级。
+
+所以即使只按数量比较，也仍有很大距离。
+
+更何况百万小时还必须保证：
+
+- 多本体；
+- 多任务；
+- 多场景；
+- 质量；
+- 动作可对齐。
+
+---
+
+## 20. 他把具身 GPT-1 Moment 与“数据真正可 Scale”绑定，而不是与某个单一模型发布绑定
+
+沈宇军的判断不是：
+
+“哪个模型参数到 100B，就进入 GPT-1。”
+
+而是：
+
+当具身训练数据能够进入真正的大规模增长阶段，模型能力出现清楚的 Scale-up 曲线，才更像 GPT-1 Moment。
+
+他在 2026 年 7 月给出的个人预测是：
+
+**可能到 2027 年中附近出现这种明显信号。**
+
+这是非常激进的预测，目前仍未验证。
+
+---
+
+## 21. 他对 PI 与 Generalist 的路线差异做了一个很有意思的简化
+
+访谈中的概括大致是：
+
+### Physical Intelligence
+更强调强 Generalist Foundation，追求较强 Zero-shot / Out-of-the-box 能力。
+
+### Generalist AI
+更强调基础模型之后，进入具体场景做 Post-training / Adaptation。
+
+沈宇军认为长期大概率不是二选一：
+
+真正可用系统既需要强基座，也需要面向具体任务继续学习。
+
+---
+
+## 22. 灵巧手的发展可能改变数据采集方式
+
+传统双臂夹爪体系里：
+
+- Teleoperation；
+- Leader-follower；
+- UMI
+
+都有各自优势。
+
+但五指灵巧手出现后：
+
+- 人手动作空间更匹配机器人；
+- 第一人称 / 可穿戴采集可能价值上升；
+- 直接映射人与机器人动作也可能发生变化。
+
+因此“未来主流采集设备是什么”仍没有定型。
+
+---
+
+## 23. 沈宇军判断：2026 年“大脑”总体仍落后于“本体”
+
+今天很多机器人硬件已经可以：
+
+- 跑；
+- 跳；
+- 做高动态动作；
+- 拥有大量自由度。
+
+但真正复杂开放任务的智能仍不足。
+
+因此当前核心矛盾更多是：
+
+**Body can do more than Brain knows how to use。**
+
+这也是团队坚持先做机器人“大脑”的原因。
+
+---
+
+## 24. 但长期不会永远是“大脑落后”，而会出现软硬件交替成为瓶颈
+
+模型能力提升后，可能突然发现：
+
+- Sensor 不够；
+- Tactile 缺失；
+- 自由度不够；
+- 机械结构限制；
+- Compute 不够。
+
+硬件升级后，大脑又可能重新成为瓶颈。
+
+所以 Robotics 更像：
+
+**Brain ↔ Body alternating bottleneck。**
+
+而不是软件单方面长期统治硬件。
+
+---
+
+## 25. 硬件代际甚至可能因为传感器配置不匹配，无法承载下一代模型
+
+一个机器人如果设计时没有：
+
+- 足够 Camera；
+- Depth；
+- Tactile；
+- Proprioception；
+- 合适算力接口，
+
+即使下一代模型理论上更强，也未必能直接部署。
+
+所以机器人公司必须做更长期的软硬件协同规划。
+
+这也是具身智能和纯云模型最大的产业差异之一。
+
+---
+
+## 26. 他并不迷信 Humanoid，核心目标是“通用智能”，不是“长得像人”
+
+人形有现实环境兼容优势。
+
+但沈宇军并不认为：
+
+**具身智能 = 人形机器人。**
+
+一个真正 General Robot Brain 应尽可能跨：
+
+- Humanoid；
+- 双臂；
+- 移动操作平台；
+- 其他本体。
+
+所以团队把 Brain 与 Body 尽量解耦，是一种刻意的路线选择。
+
+---
+
+## 27. 这也解释了为什么他们选择“先大脑、后本体”
+
+自己同时做全套 Humanoid 会带来大量：
+
+- 机械；
+- 电机；
+- 供应链；
+- 控制；
+- 生产
+
+问题。
+
+而“机器人智能”本身已经足够难。
+
+因此团队希望：
+
+**通过多种现有本体训练统一大脑，验证 Intelligence Scaling；**
+
+而不是先锁定一个 Body，再让模型围绕它局部优化。
+
+---
+
+## 28. 沈宇军认为 2024—2026 最大行业变化，是从“机器人展示”开始向“真实场景能力”转移
+
+2024 大量公司首先证明：
+
+机器人本体能动。
+
+2025 开始大量 VLA 和数据路线出现。
+
+2026 重点越来越变成：
+
+- 泛化；
+- 数据规模；
+- 真实部署；
+- 稳定性；
+- 预训练；
+- 场景迁移。
+
+行业讨论正在从“这个动作能不能做出来”转向：
+
+“这套能力能不能复制、能不能 Scale”。
+
+---
+
+## 29. 他对行业最根本的诊断仍然是：不是硬件不够酷，而是 Intelligence 不够
+
+机器人 Demo 已经足够吸引眼球。
+
+但：
+
+- 为什么这个任务会失败；
+- 为什么换一个物体就不行；
+- 为什么不能理解开放指令；
+- 为什么不能在新场景自己调整；
+
+这些问题最终都指向：
+
+**智能本身还不够。**
+
+所以他不希望团队只追逐某个 Humanoid 外形或单一 Demo。
+
+---
+
+## 30. 沈宇军的研究方法延续了汤晓鸥一脉很强的“先找范式，再做工程放大”倾向
+
+访谈后半部分回顾了他的学术经历：
+
+- 早期生成模型；
+- GAN；
+- 表征学习；
+- 商汤；
+- 与汤晓鸥的交流。
+
+他把汤晓鸥带给自己的重要影响概括成：
+
+- 关注大问题；
+- 不只盯局部 Benchmark；
+- 敢于做长期方向判断；
+- 看到范式变化后迅速下注。
+
+这也能解释他为什么在具身领域强调：
+
+**不要只修一个模型指标，而要重新想“Physical Foundation Model 应该是什么”。**
+
+---
+
+# 三、清洗编辑版长篇访谈稿
+
+## 第一章：从生成模型走到具身智能
+
+**张小珺：** 你以前做生成模型和表征学习，为什么后来会进入机器人？
+
+**沈宇军：**
+
+我过去很长时间研究的是：
+
+- GAN；
+- Representation Learning；
+- Generative Model。
+
+这些问题本质上都在问：
+
+模型怎样理解和生成世界。
+
+后来大模型把数字世界的知识吸收得越来越多，我开始更关心：
+
+如果模型真正进入 Physical World，会发生什么？
+
+机器人给了 AI 一个新的约束：
+
+它不能只“说得对”。
+
+它必须真正行动，而且 Action 会产生后果。
+
+这对 Model Representation、Data、Architecture 都提出了新要求。
+
+## 第二章：为什么后来从大厂研究转向独立做机器人基础模型
+
+**张小珺：** 为什么会选择出来做一个更独立的团队？
+
+**沈宇军：**
+
+大公司当然有很多资源。
+
+但具身智能现在还在很早期。
+
+很多重要问题需要：
+
+- 很快试错；
+- 很快改路线；
+- 重新设计 Data Pipeline；
+- 重新分配算力；
+- 重新判断什么值得做。
+
+如果组织太复杂，可能很难在这种高速范式变化里保持一致节奏。
+
+所以我们更希望围绕：
+
+**Robot Brain**
+
+建立一个长期、聚焦的团队。
+
+## 第三章：为什么先做“大脑”，而不是先造一台人形
+
+**张小珺：** 国内很多具身公司先做人形本体。为什么你们相反？
+
+**沈宇军：**
+
+因为我认为今天更缺的是 Intelligence。
+
+硬件已经进展很快。
+
+很多 Robot：
+
+- 能走；
+- 能跑；
+- 有很多自由度。
+
+但真正让它进入开放环境做复杂任务，Brain 还不够。
+
+而且如果 Brain 绑定某一个 Body，很容易把模型优化成 Specialist。
+
+我们希望先回答：
+
+**能不能做跨本体、跨任务、跨场景的 General Robot Brain？**
+
+## 第四章：怎样定义“General”？
+
+我觉得至少要看三个维度。
+
+第一，换机器人后能不能迁移。
+
+第二，换环境后能不能工作。
+
+第三，换任务后能不能组合已有能力。
+
+如果只在同一个 Robot、同一张桌子上做一百个任务，我不觉得这已经是真正 General。
+
+## 第五章：2025 年我们首先押了“Sensor-native”
+
+机器人不是网页。
+
+它天然有：
+
+- Camera；
+- Depth；
+- Robot State；
+- Action；
+- 多视角。
+
+所以我们一开始就认为，Robot Foundation Model 应该从真实 Sensor 世界出发。
+
+很多数字模型只处理 RGB + Language。
+
+对于 Physical Agent，这个信息是不完整的。
+
+## 第六章：到 2026 年，我们觉得只在数字模型上“魔改”不够了
+
+最开始大家很自然：
+
+拿一个非常强的 VLM，接 Action，再不断修改。
+
+这个思路当然有效，而且今天很多 VLA 都这样做。
+
+但我们后来越来越明显感觉到：
+
+Physical World 有自己的问题。
+
+比如：
+
+- Real-time；
+- Spatial Geometry；
+- Temporal Causality；
+- Action Dynamics；
+- Embodiment Difference。
+
+如果这些东西都是后面补丁式地加进去，Model 不一定真的最适合机器人。
+
+所以我们开始更强调：
+
+**Embodied-native。**
+
+不是从数字世界模型问：
+
+“怎么改成机器人？”
+
+而是从机器人问：
+
+“我到底应该训练什么模型？”
+
+## 第七章：为什么会同时做六类模型
+
+我们不是为了做六个 Model SKU。
+
+每一类模型实际上在补 Physical Intelligence 的不同缺口。
+
+Depth 是几何。
+
+Vision 是更细的空间语义。
+
+VLA 是 Action。
+
+Video 是 Dynamic Visual Prior。
+
+World 是更长的世界演化。
+
+VA 是把 Action 和 Video Dynamics 结合。
+
+未来这些能力怎样融合还会继续变化。
+
+今天没必要为了“一个模型看起来最优雅”，强行把所有问题塞进同一个网络。
+
+## 第八章：真正困难的是 Pre-training Data
+
+大家很容易讨论 Architecture。
+
+但大规模训练之前，真正耗精力的是：
+
+- Data Task 怎么分；
+- 不同机器人怎么统一；
+- 什么轨迹该留；
+- 什么轨迹该删；
+- 怎么做标注；
+- 怎么处理异常。
+
+机器人数据比文本复杂得多。
+
+一条 Episode 同时有多 Camera、Action、State、Task。
+
+其中任何一条时序错位，整条数据就可能失效。
+
+## 第九章：为什么 Data Cleaning 本身是能力
+
+如果一个 Demonstration 看起来成功，但：
+
+- Video 丢帧；
+- Robot State 错位；
+- Action Jerk 异常；
+- Camera 不同步；
+
+模型还是会学到错误东西。
+
+所以数据不是“成功 Episode = 好数据”。
+
+我们要建立更系统的数据生产和 Cleaning 能力。
+
+长期来看，这可能和 Model Architecture 一样重要。
+
+## 第十章：从 2 万小时到 6 万小时
+
+第一代公开 VLA 使用约两万小时数据，覆盖九类双臂配置。
+
+第二代已经扩大到约六万小时，并增加更多 Robot、更多 Human Video。
+
+数据在增加，但我仍然认为这远远不够。
+
+语言模型吃的是互联网规模数据。
+
+机器人如果只在几万个小时级停住，很难真正看到类似 GPT 的 Scaling。
+
+## 第十一章：语义智能和空间智能之间还有一条鸿沟
+
+VLM 很会回答：
+
+“这是一个杯子。”
+
+但机器人真正要做的是：
+
+- 杯子离我多远；
+- 抓哪里；
+- 手从哪边过去；
+- 哪个物体挡住；
+- 放下后会不会倒。
+
+所以 Physical AI 需要更强的 Spatial Representation。
+
+Depth、Geometry、Dense Vision 都不是可有可无的附属能力。
+
+## 第十二章：为什么动作和未来预测应该进入预训练
+
+机器人不是只看世界。
+
+它的动作会改变世界。
+
+如果 Model 能学习：
+
+**现在状态 + Action → 下一状态**
+
+它就不仅知道“世界是什么”，还开始理解“我做了什么之后世界会怎样”。
+
+这是 Physical Intelligence 非常核心的一部分。
+
+## 第十三章：为什么强调 Causal / Temporal Structure
+
+Online Robot 不可能看到未来。
+
+所以 Model 在时间建模上必须尊重：
+
+Past → Present → Action → Future。
+
+很多数字世界 Representation 可以使用双向信息。
+
+Physical Agent 最终要部署时，因果方向更加重要。
+
+## 第十四章：MoE 为什么可能适合 Robot
+
+机器人数据特别异质。
+
+不同 Robot 的动作模式完全不一样。
+
+不同 Task 也不同。
+
+我不希望每个 Robot 都训练一个独立 Model。
+
+更自然的是：
+
+共享大部分知识，但允许部分 Expert 专门处理不同模式。
+
+MoE 是我们认为值得探索的一个方向。
+
+## 第十五章：真正的 Generalization 应该从随机状态开始看
+
+如果一个 Demo 每次都：
+
+同一个杯子；
+同一个位置；
+同一个起点，
+
+成功率再高也不能说明很多东西。
+
+更有意义的是不断 Randomize：
+
+- 位置；
+- 姿态；
+- 环境；
+- 物体。
+
+然后看 Model 是否仍能完成任务。
+
+我们开始看到一些这方面的信号，但距离真正 Open World 还有很长距离。
+
+## 第十六章：为什么我认为还没到 GPT-1
+
+最大的原因还是 Data。
+
+语言模型第一次真正进入 Scaling，是因为 Data 可以持续加。
+
+Embodied Data 今天还是很贵。
+
+很多团队几千、几万小时已经觉得很多。
+
+但我觉得真正的量级可能至少要到百万小时。
+
+不仅量要大，Distribution 也必须大。
+
+所以我个人判断：
+
+机器人真正 GPT-1-like Moment 可能还要等 Data Scale-up 再走一步。
+
+## 第十七章：这个时间可能什么时候出现？
+
+这是非常粗糙的个人判断。
+
+如果行业数据增长速度保持现在的趋势，也许到 2027 年中附近会出现更清晰的信号。
+
+但真正决定时间的不是 Calendar。
+
+而是：
+
+我们有没有找到能把 Data 持续做大的方式。
+
+## 第十八章：PI 和其他 Generalist 路线给了什么启发？
+
+我觉得不同团队会在：
+
+- Zero-shot；
+- Generalist Base；
+- Post-training；
+- Deployment Adaptation
+
+之间选择不同重点。
+
+有人更强调：
+
+强 Foundation 直接做大量任务。
+
+有人更强调：
+
+先有 Base，然后在具体场景 Post-train。
+
+最终真实系统大概率两种能力都需要。
+
+Foundation 足够强，Post-training 才便宜。
+
+具体场景继续训练，又能把最终性能推高。
+
+## 第十九章：数据采集工具还会变化
+
+今天：
+
+- Teleoperation；
+- Leader-follower；
+- UMI
+
+都很重要。
+
+但未来灵巧手越来越成熟以后，人手和 Robot Hand 的映射关系会变化。
+
+Wearable、Egocentric、Human Demonstration 的价值可能进一步上升。
+
+所以现在不应该认为 Data Collection Interface 已经定型。
+
+## 第二十章：为什么大脑和本体会交替成为瓶颈
+
+今天我觉得 Brain 更弱。
+
+但如果某一代模型突然非常强，可能马上发现：
+
+- Sensor 不够；
+- Tactile 不够；
+- Robot Hand 不够灵活。
+
+于是 Hardware 成为瓶颈。
+
+硬件升级后，Model 又会成为瓶颈。
+
+这个过程会反复。
+
+所以真正长期领先的团队，至少要理解软硬件如何共同进化。
+
+## 第二十一章：为什么我不把“人形”当成唯一答案
+
+人形当然很重要，因为现实环境为人设计。
+
+但我更关心：
+
+一个 Brain 能不能跨不同身体。
+
+如果每一个 Body 都重新训练一个 Intelligence，那离 Foundation Model 还有距离。
+
+所以我们希望尽量把：
+
+**Intelligence 与 Embodiment**
+
+分开建模，再通过统一表示把它们连接起来。
+
+## 第二十二章：过去两年行业最大的变化
+
+2024 年大家先证明：
+
+Robot Body 可以做很酷的动作。
+
+2025 年大家大量进入：
+
+VLA、Data、Foundation Model。
+
+2026 年开始越来越多人问：
+
+- 泛化在哪里；
+- Scaling 在哪里；
+- 预训练怎么做；
+- 数据够不够；
+- 为什么换个场景就失败。
+
+这是好事。
+
+说明行业从 Demo 进入真正的基础问题。
+
+## 第二十三章：汤晓鸥对我的影响
+
+老师对我最大的影响，不是某一个具体算法。
+
+更多是一种：
+
+看大问题的方式。
+
+不要只问：
+
+“这个 Benchmark 能不能再涨一点？”
+
+而是问：
+
+“这个领域真正的范式是什么？”
+
+“如果这个方向是对的，几年后会发生什么？”
+
+我觉得做具身智能也需要这种思维。
+
+今天很多判断可能错。
+
+但必须敢于提出能够被未来数据验证的大方向。
+
+---
+
+# 四、技术核验：访谈中的路线如何映射到已公开 LingBot 系统
+
+## 1. LingBot-VLA v1 → v2：数据和本体持续扩大
+
+公开资料显示：
+
+### v1
+- 约 20,000 小时真实世界机器人数据；
+- 9 种双臂配置；
+- 4B 级模型；
+- 提供带 / 不带 Depth 的版本。
+
+### v2
+- 60,000 小时预训练数据；
+- 50,000 小时 Robot Trajectory；
+- 10,000 小时 Egocentric Human Video；
+- 20 种机器人配置。
+
+这与访谈“Data Scale 是核心 Bet”的叙事一致。
+
+## 2. 90,000 小时 Raw Robot Data → 50,000 小时 Training Data
+
+VLA 2.0 技术报告披露：
+
+原始机器人数据约 90k 小时，最后筛到约 50k 小时。
+
+主要 QC 包括：
+
+- Velocity / Acceleration / Jerk 异常；
+- 近静止轨迹；
+- State-Video Alignment；
+- Blur；
+- Occlusion；
+- Dropped Frame；
+- Multi-view Misalignment。
+
+因此“数据规模”应区分：
+
+**Raw Hours / Valid Hours / Effective Training Hours。**
+
+## 3. Human Video 也存在完整 QC Pipeline
+
+约 20k 小时候选 Human Video 最终保留约 10k 小时。
+
+处理包含：
+
+- VLM 筛选第一人称操作；
+- SLAM；
+- Hand Pose；
+- Hand Coverage；
+- SLAM Acceleration；
+- Trajectory Continuity；
+- Physiological Constraints。
+
+这说明人类视频并非低成本“拿来即用”。
+
+## 4. 统一 55 维动作空间是 Cross-Embodiment 的关键基础设施
+
+不同机器人动作统一到 Canonical Action Vector，覆盖：
+
+- Arms；
+- End Effector；
+- Gripper；
+- Dexterous Hand；
+- Waist；
+- Head；
+- Mobile Base。
+
+这使多本体数据能进入同一训练体系。
+
+## 5. VLA 2.0 使用稀疏 MoE Action Expert
+
+其公开结构中包含 Token-level Sparse MoE，并采用不依赖额外 Auxiliary Loss 的 Load Balancing。
+
+因此访谈里“机器人数据异质性可能需要 MoE”的方向，已经对应到公开系统实现。
+
+## 6. VLA 2.0 还加入 Predictive Dynamics
+
+其表示学习不只看当前图像，还引入：
+
+- DINO-Video Semantic Feature；
+- LingBot-Depth Geometric Feature；
+
+预测 Future Scene Representation。
+
+所以“Physical-native”不仅体现在 Action Head，也进入视觉时序 Pretraining。
+
+## 7. LingBot-VA 与 LingBot-World 不应混为一谈
+
+### LingBot-VA
+更强调：
+
+**Video + Action 的 Causal Dynamics。**
+
+### LingBot-World
+更强调：
+
+- 长时世界生成；
+- 交互式演化；
+- 更广 Physical World Modeling。
+
+二者有关联，但目标并不完全相同。
+
+---
+
+# 五、截至 2026 年 9 月回看
+
+## 1. “数据 Scale-up”确实仍是公开路线的主轴
+
+从 v1 的 20k 小时到 v2 的 60k 小时，数据规模继续扩大。
+
+但与沈宇军提出的 Million-hour-level 仍相差一个数量级以上。
+
+因此截至 2026 年 9 月：
+
+**“具身数据已经解决”显然还不能成立。**
+
+## 2. 数据治理的工程化程度比访谈中的口头描述更具体
+
+公开技术报告已经把 Robot QC 拆到：
+
+- 动力学统计；
+- 视觉质量；
+- 时序同步；
+- State-Image Alignment；
+- Human Motion Reconstruction。
+
+这意味着“数据质量”已经成为独立工程栈，而不只是研究员抽查。
+
+## 3. “具身原生”正在从口号变成多条具体技术选择
+
+截至当前公开系统里可以看到：
+
+- Predictive Dynamics；
+- Depth Geometry；
+- Canonical Action Space；
+- Sparse MoE Action Expert；
+- Human / Robot Co-training；
+- Causal Video-Action Modeling；
+- World Model。
+
+这些选择共同指向：
+
+**不是只给 VLM 增加 Action Token，而是重新设计 Physical Pretraining。**
+
+## 4. 但“六个模型最终是否会统一”仍没有答案
+
+当前更像：
+
+多个模型分别解决不同 Physical Capability。
+
+行业最终会：
+
+- 统一成一个 Omni Model；
+- 还是保留快慢分层；
+- 还是 Agent 编排多个模型，
+
+截至 2026 年 9 月仍然开放。
+
+## 5. “2027 年中出现 GPT-1 Moment”仍然只是预测
+
+现在只能看到：
+
+- 数据增加；
+- 模型变强；
+- 本体覆盖扩大；
+
+但还没有足够公开证据证明具身领域已经形成类似 LLM 那种稳定、可外推的 Scaling Curve。
+
+所以这一时间判断需要继续观察。
+
+---
+
+# 六、从具身数据质检 / 数据治理视角看，这期最值得带走什么
+
+## 1. Raw Data 数量不能直接当训练资产
+
+90k → 50k 的公开数据筛选非常具有代表性。
+
+机器人项目汇报时最好分开统计：
+
+- Raw Hours；
+- Passed-QC Hours；
+- Annotated Hours；
+- Actually-used Hours。
+
+否则“采了多少小时”很容易虚高。
+
+## 2. 机器人 QC 至少应拆成四层
+
+### Sensor Quality
+- Blur；
+- Frame Drop；
+- Occlusion；
+- Multi-view Sync。
+
+### State / Action Quality
+- Jerk；
+- Velocity；
+- Acceleration；
+- Near-static；
+- Control Saturation。
+
+### Cross-modal Alignment
+- URDF Projection；
+- State ↔ Image；
+- Timestamp。
+
+### Semantic / Task Quality
+- Task Label；
+- Success；
+- Subtask；
+- Failure Type。
+
+这是比简单“听看可用”更适合大规模预训练的数据治理框架。
+
+## 3. Cross-Embodiment 前提是 Action Semantics 被明确治理
+
+统一成 55 维 Vector 只是第一步。
+
+数据平台还必须记录：
+
+- Absolute / Delta；
+- Coordinate Frame；
+- Unit；
+- Control Frequency；
+- Joint Ordering；
+- Rotation Representation；
+- Missing DOF；
+- Mask。
+
+否则“维度统一”并不等于“语义统一”。
+
+## 4. Human Video QA 和 Robot QA 是两套不同体系
+
+Human Video 没有 Robot State Ground Truth。
+
+所以必须借助：
+
+- SLAM；
+- Hand Pose；
+- Physiological Constraint；
+- Temporal Continuity
+
+来判断动作是否可信。
+
+这类数据不能简单复用 Robot Demonstration 的质检规则。
+
+## 5. “数据 Scale”最终应该理解为 Effective Coverage Scale
+
+真正应该增长的是：
+
+**有效覆盖的 Task × Scene × Embodiment × State × Failure。**
+
+如果百万小时都来自少量重复动作，仍不等于 GPT-style Scaling。
+
+这也是沈宇军“数据 Scale-up”观点最容易被误解的地方。
+
+---
+
+# 七、资料来源与可靠性说明
+
+主要依据：
+
+1. 《张小珺Jùn｜商业访谈录》第 147 期小宇宙官方节目页与时间轴，2026-07-22。
+2. 同期公开节目视频与自动转写文本，用于恢复问答细节。
+3. LingBot-VLA v1 官方公开资料：约 20k 小时、9 种双臂配置。
+4. LingBot-VLA 2.0 技术报告：60k 小时预训练数据、20 种机器人配置、50k Robot + 10k Egocentric Human、数据 QC、55D Canonical Action、MoE Action Expert、Predictive Dynamics。
+5. LingBot-Depth / Vision 官方技术资料，用于核验空间感知路线。
+6. LingBot-VA 官方资料，用于核验 Causal Video-Action World Modeling。
+7. LingBot-World / LingBot-Video 官方资料，用于核验长时世界建模与视频生成方向。
+
+其中：
+
+- “百万小时”“2027 年中 GPT-1 Moment”“大脑落后本体”等属于沈宇军的个人判断。
+- VLA 2.0 数据清洗的具体阈值和工程流程来自技术报告，不是访谈逐字内容。
+- “六个模型”是研究版图，不代表六者已经完整联合训练成一个统一模型。
+
+---
+
+# 八、一句话概括
+
+> **沈宇军这期真正想表达的不是“我们也做了一个 VLA”，而是：如果具身智能要复制 LLM 的 Scaling，它需要从物理世界本身重新定义预训练——包括空间、因果、动作、本体和数据治理；而今天距离 GPT-1-like Moment 最大的缺口，仍然是高质量、多本体、多任务数据没有真正 Scale Up。**

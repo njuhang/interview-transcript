@@ -1,0 +1,1024 @@
+# 张小珺 × 谭捷：访谈要点与清洗编辑版长篇访谈稿
+
+> 节目：《张小珺Jùn｜商业访谈录》第 121 期  
+> 标题：对 DeepMind 谭捷的访谈：机器人、跨本体、世界模型、Gemini Robotics 1.5 和 Google  
+> 发布时间：2025 年 11 月 28 日  
+> 时长：约 2 小时 06 分  
+> 嘉宾：谭捷（Jie Tan），Google DeepMind Robotics Principal Research Scientist / Director，长期从事机器人基础模型、深度强化学习、仿真与 Sim-to-Real、操控与跨本体研究
+
+---
+
+# 一、文档说明
+
+这不是对节目原始逐字稿的复制，而是一份**基于公开正式文字稿、完整节目时间轴、Google DeepMind 官方资料和相关论文交叉核验后，重新编辑的长篇访谈稿**。
+
+整理时做了以下处理：
+
+1. 删除广告、导流、开场包装、重复寒暄和大量口语填充。
+2. 删除与技术主线关系较弱的吃饭、旅游、快问快答等内容。
+3. 保留谭捷个人经历中与机器人研究范式变化直接相关的部分。
+4. 合并重复观点，但尽量保留“问题—论据—结论”的完整逻辑链。
+5. 将中英夹杂统一为中文为主，并保留关键英文术语。
+6. 对 Gemini Robotics 1.5、Embodied Reasoning、Motion Transfer、RT-X、Sim-to-Real 等概念，用 Google DeepMind 官方技术说明和论文校正。
+7. 谭捷未公开的 Motion Transfer 具体实现不作猜测。
+8. 访谈中的行业时间预测、公司文化和中美比较均视为嘉宾在 2025 年 11 月时点的个人判断。
+9. 文末增加“截至 2026 年 8 月的回看”，不把访谈之后的新进展混入原始问答。
+
+因此，本稿更适合技术研究、路线梳理和内部分享，而不是作为法律意义上的逐字记录。
+
+---
+
+# 二、核心观点
+
+## 1. 过去十年机器人经历了两次明显的范式迁移
+
+谭捷把过去十年的机器人技术变化概括成两次 Paradigm Shift。
+
+第一轮是 **Deep Reinforcement Learning + Simulation + Sim-to-Real**，主要改变机器人的“小脑”：步态、平衡、运动控制和底层执行。
+
+第二轮是 **LLM / VLM / Foundation Model**，主要给机器人补上“大脑”：自然语言理解、常识、视觉语义理解、规划和推理。
+
+在他的类比里：
+
+- 大模型更像“大脑”；
+- 强化学习更像“小脑”；
+- 真正通用的机器人最终需要二者结合。
+
+## 2. 当前所谓“机器人基座大模型”，还没有完全成为独立于多模态大模型的新学科
+
+这是整期访谈中非常值得注意的判断。
+
+谭捷认为，截至 2025 年，VLA 的主要成功路径仍然是：
+
+**强 VLM / MLLM 基座 + 机器人动作数据 + Action 输出能力。**
+
+也就是说，今天的机器人 Foundation Model 很大程度上仍然继承互联网规模视觉—语言预训练带来的能力，然后补上 Robot Action。
+
+RT-2 就体现了这条路线：把 Web-scale VLM 与机器人数据共同训练，使模型既保留视觉语义和常识，又可以直接输出动作。
+
+因此，他对“机器人基础模型已经形成完全独立的新范式”的回答是：**So far, not yet。**
+
+未来如果机器人需要完全不同的数据格式、世界模型、记忆、物理交互结构或新的 Scaling Recipe，这个判断可能改变。
+
+## 3. 当前机器人最大的瓶颈不是模型，而是数据
+
+如果整期只能留下一句话，大概就是：**Robotics 最大的问题是 Data。**
+
+语言模型拥有天然的互联网数据：网页、图书、PDF、代码、图片、视频和大量人类文本。
+
+机器人则生活在极其复杂的非结构化物理世界中，同一个任务可能由于房间、光照、物体、材质、姿态、本体、接触状态和人的干扰而发生巨大变化。
+
+因此模型需要海量、高覆盖度、多样化的数据，而这些数据当前并不存在。
+
+谭捷甚至认为，现在数据还远远没有把模型能力“喂饱”，所以行业甚至尚未真正暴露第二大瓶颈。等数据足够多以后，架构才可能成为更明显的限制。
+
+## 4. 数据不是“真实 vs 仿真”的二元选择，而应该构成一个数据金字塔
+
+谭捷提出的数据金字塔大致可以理解为：
+
+### 底层：规模最大、机器人相关性最低
+- 互联网图文；
+- 普通视频；
+- 大规模视觉语言数据。
+
+### 中层：人类行为数据
+- YouTube 视频；
+- 第一人称 Egocentric Video；
+- 人类操作视频；
+- 未来可能包括生成式视频。
+
+### 中上层：仿真/合成数据
+- MuJoCo；
+- Bullet；
+- Isaac；
+- 生成式世界模型；
+- 视频生成模型产生的交互数据。
+
+### 顶层：机器人本体高质量数据
+- Teleoperation；
+- 特定机器人；
+- 特定动作空间；
+- 精细 Manipulation；
+- 与部署平台高度一致的数据。
+
+越接近顶层，机器人相关性越高、单条数据价值越大，但成本也越高、可扩展性越差。所以没有哪一种数据应该单独承担全部训练。
+
+## 5. 他真正信仰的不是“仿真”，而是 Scalable Data
+
+这是区分谭捷和“传统仿真派”的关键。
+
+他不是认为未来机器人应该全部靠 MuJoCo 或 Isaac 生成数据，而是认为真正能解决机器人 Scaling 的数据源必须能够随着 Compute 扩展，而不能随着人工操作员数量线性扩展。
+
+因此 Scalable Data 可以包括：
+
+- 物理 Simulation；
+- Human Video；
+- Egocentric Video；
+- 视频生成模型；
+- World Model；
+- Synthetic Trajectory；
+- 未来其他自动生成数据。
+
+而纯 Teleoperation 的问题是：每增加一小时数据，往往都要增加真实人的劳动、真实设备和运营成本，很难形成互联网数据那样的扩张能力。
+
+## 6. “真实数据泛化性更好”这个说法并不准确
+
+真实数据的优势是：**没有 Sim-to-Real Gap。**
+
+但泛化能力取决于：**Coverage。**
+
+如果真实机器人只在一个厨房、一种光线、一组物体上采集，那么它依然无法泛化到完全不同的家庭。
+
+所以：**Real ≠ Generalizable。**
+
+真正决定泛化的，是数据分布是否覆盖部署时可能遇到的状态。
+
+## 7. 当前机器人数据质量甚至还没有统一定义
+
+数据工厂正在快速出现，但行业面临一个尴尬问题：大家甚至不知道怎样客观定义“高质量机器人数据”。
+
+现实中的判断仍然大量依赖研究人员经验，例如：动作是否抖动、是否平滑、有没有重复、Demonstration 是否成功、操作员是否稳定、是否覆盖有效状态、是否包含有价值的失败和恢复。
+
+所以当第三方 Data Foundry 的数据训练效果不好时，很容易出现“数据公司认为模型没训好、模型公司认为数据质量差”的争议。
+
+缺乏统一的数据质量指标，本身就是机器人数据研究的重要问题。
+
+## 8. Gemini Robotics 1.5 的第一个关键变化：让 VLA “Think Before Acting”
+
+传统 VLA 的形式接近：
+
+**Image + Language → Action**
+
+Gemini Robotics 1.5 则引入自然语言形式的内部推理，让机器人在复杂任务中先分解问题，再执行动作。
+
+例如“按照颜色整理衣服”，不再只是直接输出连续控制，而可以先识别衣物颜色、判断应该放到哪里、选择下一件，再继续执行。
+
+Google DeepMind 官方技术报告也将这一点描述为：**interleave actions with multi-level internal reasoning in natural language。**
+
+它使机器人更适合执行长程、多步骤任务，同时提高可解释性。
+
+## 9. Gemini Robotics 1.5 当前采用快慢双系统
+
+系统大致分为：
+
+### Gemini Robotics-ER 1.5
+Embodied Reasoning，负责高层规划、长时间思考、空间理解、工具调用、Web Search、任务分解和 Progress Estimation。
+
+### Gemini Robotics 1.5 VLA
+负责高频视觉闭环、机器人动作输出、快速局部判断和实时操作。
+
+因此可以理解成：
+
+**ER = Slow Thinking / Planner**
+
+**VLA = Fast Thinking / Policy**
+
+这与很多机器人“Planner + Policy”的层级结构非常接近。
+
+## 10. 谭捷并不认为这种双模型结构一定是终局
+
+他的判断反而是：**它更像现实条件下的过渡方案。**
+
+主要限制是计算量。
+
+强 Reasoning Model 参数大、需要工具调用、可能需要长 CoT，无法以 5—10 Hz 实时输出电机动作；小 VLA 可以快速控制，但复杂规划能力不足。
+
+所以暂时拆成快慢模型。
+
+如果未来计算成本允许，他个人更倾向于 Unified Model，因为两个模型之间如果只能通过自然语言通信，会产生信息瓶颈。
+
+## 11. 但“终局端到端”不意味着今天不应该分层
+
+这里最容易被误读。
+
+谭捷不是说现在所有 Planner 都应该删除，只训练一个超大 VLA；而是说长期历史经常表现出一种趋势：早期因为能力不足，人们会用传统模块 + 学习模块做 Hybrid System；当学习系统能力不断增强以后，更多功能最终会被端到端模型吸收。
+
+他自己早期做 Locomotion 时也曾尝试“传统控制器 + RL 调参”，因为短期效果很好。但几年后主流最终变成 state → policy → action 的端到端 RL。
+
+所以他倾向认为 Manipulation / VLA 可能经历类似演化。
+
+## 12. 第二个关键变化是 Cross-Embodiment Motion Transfer
+
+跨本体一直是机器人基础模型最难的问题之一。
+
+不同机器人自由度不同、手臂长度不同、关节定义不同、Action Space 不同、Sensor 不同、控制频率不同。
+
+因此传统做法通常意味着：每换一个机器人，就重新采数据、重新训练。
+
+Gemini Robotics 1.5 引入 Motion Transfer，使同一个训练体系可以利用多个不同机器人本体的数据。官方实验展示了 ALOHA 2、双臂 Franka 和 Apptronik Apollo 之间的知识迁移。
+
+## 13. Motion Transfer 不是“新机器人 Zero-shot 就会做所有事情”
+
+谭捷特别澄清：它不是拿来一个从没见过的新机器人，不采任何数据，就自动继承其他机器人的全部技能。
+
+更准确的是：在训练集合中已经包含多个机器人本体时，如果某一个机器人没有见过某项任务，而另一个机器人见过，那么共享训练可以让这个任务知识迁移过去。
+
+所以当前展示的主要是：**跨本体数据带来的任务迁移。**
+
+并不等价于：**任意新本体的零样本适配。**
+
+## 14. 跨本体迁移是否有效，与 Embodiment Gap 强相关
+
+如果两个机器人都属于双臂、夹爪、近似工作空间，那么迁移相对容易。
+
+如果要从单臂到双臂、夹爪到五指灵巧手、固定机械臂到全身人形，迁移难度会明显增加。
+
+另一个关键变量是目标机器人的数据量。如果目标本体已有海量数据，额外使用其他机器人数据带来的增益很小；反之，如果人形机器人自己的数据很贵，但 ALOHA 数据很多，跨本体训练价值就很高。
+
+## 15. Open X-Embodiment / RT-X 是这条路线的重要前史
+
+Gemini Robotics 1.5 的 Motion Transfer 并不是凭空出现的思想。
+
+Google DeepMind 此前推动 Open X-Embodiment：21 个机构、22 种机器人、527 种技能、超过 16 万个任务实例。
+
+RT-X 已经证明：同一个模型利用多个机器人来源的数据，可以比每个机器人单独训练获得更好的迁移与泛化。
+
+Gemini Robotics 1.5 更进一步，在模型架构和训练配方上专门设计 Motion Transfer，使跨本体数据共享能力继续增强。
+
+## 16. 世界模型的关键不只是“会生成视频”，而是“动作可控”
+
+谭捷给出的直观定义是：如果给模型当前世界状态，再给一个机器人动作，模型能够预测下一时刻世界状态，那么它才接近机器人语境下真正的 World Model。
+
+因此普通 Video Generation：**Text → Video**，虽然具有很强的世界知识，但还不完全等于机器人世界模型。
+
+机器人真正需要的是：**State / Image + Action → Next State / Image**，而且模型应该允许 Agent 在每个时间步重新输入动作，改变未来演化。
+
+## 17. 传统物理 Simulation 与生成式 World Model 未来可能融合
+
+传统仿真的优势是动作可控、物理约束明确、状态可直接访问、可无限 Rollout；缺点是场景资产要人工搭建、Reality Gap 明显、复杂材质和柔体难模拟、家庭世界的多样性昂贵。
+
+视频生成模型恰好相反：可以快速生成大量视觉场景，Appearance 极其丰富，很容易通过 Prompt 改变环境；但物理一致性不足、动作不能稳定控制、长程状态容易漂移。
+
+谭捷判断，随着视频生成模型变成 Action-conditioned World Model，生成式仿真会逐步侵入传统物理仿真的领地。
+
+## 18. “用 Compute 换 Data”可能成为机器人 Scaling 路线
+
+机器人真正缺少的是类似语言模型的数据扩展机制：
+
+**Compute ↑ → Data ↑ → Task Coverage ↑ → Generalization ↑**
+
+如果 Simulation、World Model 和生成数据成熟，就可以把原本受真实采集人数限制的数据生产，转化成算力问题。
+
+这也是谭捷强调 Scalable Data 的根本原因。
+
+## 19. VLA 动作表示正在逐步收敛，但远没有彻底定型
+
+过去几年行业同时探索过：Discrete Action Token、Continuous Regression、Diffusion Policy、Action Chunk、Action Expert、Flow / Generative Action Model、不同层级的 Hierarchical Policy。
+
+谭捷认为，相比一年前，VLA 很多工程 Recipe 已经逐渐收敛，但这并不意味着 VLA 已经“套模板即可”。真正高性能系统仍需要大量 Model Design、Action Representation、Data Mixture、Training Recipe、Evaluation 和 Runtime Optimization。
+
+## 20. 机器人智能不能只看“大脑”，也要看“小脑”
+
+具身智能里的“智”至少包含两部分。
+
+### 大脑能力
+Common Sense、Language、Planning、Reasoning、Decision Making、Tool Use。
+
+### 小脑能力
+Balance、Locomotion、Dexterity、Manipulation、Closed-loop Motor Control。
+
+这也是为什么一个机器人可能跑步超过成年人，却连拉链都拉不好。不同能力的发展极不均衡。
+
+## 21. Locomotion 与 Manipulation 的成熟度完全不同
+
+谭捷认为 Locomotion 基本已经被 RL + Sim-to-Real 路线大幅解决。今天四足和人形机器人可以跑、跳、翻滚、打拳、跑酷。
+
+但 Manipulation 远没有解决。即使夹爪做精细任务，成功率依然可能只有 30%—40%；五指灵巧手更早期。
+
+所以“机器人已经会跑跳”并不意味着距离家庭通用机器人只差一点点。
+
+## 22. 触觉现在看似不重要，很大程度上是因为硬件仍处于“夹爪时代”
+
+谭捷早期也曾怀疑触觉是否必须，因为 ALOHA 等系统证明，仅靠视觉闭环，双臂夹爪也可以完成一些令人惊讶的精细操作。
+
+但如果机器人最终拥有类似人类的五指灵巧手，并需要精细接触、滑动、插拔、抓握力调节和柔体操控，触觉几乎不可避免。
+
+因此“视觉可以解决 95%”主要成立于当前夹爪硬件能力边界内，不应该外推到终极通用机器人。
+
+## 23. Human Video 很重要，但“通过视觉学习”和“只依赖视觉执行”是两回事
+
+机器人观看 YouTube 学习，是谭捷非常认可的方向，因为 Human Video 数据量巨大、不需要机器人遥操作、能覆盖大量任务，是 Scalable Data。
+
+但学习阶段可以通过视觉理解“人怎样拧瓶盖”，真正执行时仍可能需要视觉、触觉、力觉和 proprioception。
+
+所以：**视觉学习 ≠ 纯视觉控制。**
+
+## 24. 如果只能 Bet 一个本体，谭捷会选 Humanoid
+
+他并不认为所有机器人都会变成人形，工业机械臂、移动机器人和专用设备都会长期存在。
+
+但如果目标是 **Solve AGI in the physical world**，人形具有一个极强优势：现实世界本来就是按照人类身体设计的，例如门、楼梯、厨房、工具、汽车、桌椅和开关。
+
+因此如果只能押注一种最终形态，他会押 Humanoid。
+
+## 25. 但创业公司和大公司的正确路线可能完全不同
+
+Google DeepMind 可以长期押 Physical AGI，因为有算力、数据、研究团队、长期资本和基础模型。
+
+Startup 则必须生存，可能要先找到工业、物流、超市、洗衣、柔性布料、特定操作等垂直场景，先产生收入和部署，再形成 Deployment → Data → Better Model → More Deployment 的数据飞轮。
+
+所以 Specialized Robot 不是技术上“错误”，只是公司目标不同。
+
+## 26. 真正的机器人数据飞轮目前还没有像 Tesla 那样形成
+
+Tesla 的数据飞轮成立，是因为车本身已经是有价值的产品。用户每天真实驾驶，系统自然产生海量数据。
+
+当前人形机器人还没有跨过这个门槛。即使硬件公司制造了大量机器人，如果用户没有持续真实使用，机器也不会自然产生高价值闭环数据。
+
+所以：**Robot Shipment ≠ Data Flywheel。**
+
+## 27. 谭捷预计机器人会经历五个阶段
+
+### Stage 1：Automation
+固定规则、固定轨迹、固定环境。已经非常成熟。
+
+### Stage 2：Teleoperated Robot
+硬件成熟，但没有足够自主智能，人远程操控。
+
+### Stage 3：Narrow Generalist
+能自主完成一个较宽领域。自动驾驶可作为类似例子。
+
+### Stage 4：True Generalist
+进入家庭、制造等真实环境，做大量不同任务。
+
+### Stage 5：Superhuman Capability
+机器人在智力、体力、精确度、持续工作能力和存储能力等维度逐步超过人类。
+
+## 28. 从论文 Demo 到真正落地，十年并不夸张
+
+Research Prototype 和 Commercial Deployment 不是同一个东西。
+
+大致会经历：**Idea → Paper Prototype → Live Demo → Product Deployment**。
+
+论文成功往往依赖固定环境、有限物体、受控初始状态、没有人干扰、可以重复尝试等假设；真正产品必须在开放世界稳定运行。
+
+自动驾驶已经展示：从早期 DARPA Demo 到商业 Robotaxi，可能就是十年以上。
+
+所以看到一个极其惊艳的机器人视频，不能直接推导“明年就能进入家庭”。
+
+## 29. 机器人“GPT 时刻”和“真正落地”是两个时间点
+
+谭捷在 2025 年的个人预测是：未来两三年可能出现一个明显的机器人 GPT Moment，人们突然普遍意识到 **General-purpose robots are coming**。
+
+但大规模商业落地可能还要 5—10 年。更早出现的场景会是制造、物流、仓储、超市和商业服务；家庭场景由于开放性更高，会更晚。
+
+## 30. Google Robotics 从十几人的 Academic Lab 变成“大兵团工程”
+
+谭捷加入 Google Brain Robotics 时，团队大约只有十人，每个 Researcher 都可以自己选择课题。
+
+到了 Gemini Robotics 时代，单次工作已经需要上百名作者，因为一个 Foundation Model Robotics System 不只需要算法研究员，还需要 Data Pipeline、Training Infra、Evaluation、Robot Maintenance、Data Collection、Hardware、Distributed Training、Safety 和 Deployment。
+
+机器人基础模型已经明显从“小团队科研”变成大型系统工程。
+
+## 31. Google 的组织方式是“战略 Top-down，方法 Bottom-up”
+
+战略目标可能由上层定义，例如必须解决 Cross-Embodiment Data Scaling；但怎样解决，不一定由管理层指定。
+
+研究员会形成多个小组，分别探索不同方案。
+
+Motion Transfer 就是这种模式：**What 是 Top-down，How 是 Bottom-up。**
+
+最终多个兼容的研究想法再被整合进统一系统。
+
+## 32. “大力出奇迹”是必要条件，但不是充分条件
+
+没有算力、数据、大模型和大团队，今天的 Foundation Model 很难成立。
+
+但只堆资源不会自动得到最先进机器人，还需要 Architecture Innovation、Data Recipe、Algorithm、Evaluation、Research Taste 和 Engineering。
+
+所以可以概括成：**Scale is necessary, but not sufficient。**
+
+## 33. Foundation Model 会让一些过去非常困难的问题“免费消失”
+
+一个很好的例子是 Visual Generalization。
+
+过去机器人研究者会专门研究光照变化、背景变化、物体颜色、新场景，因为机器人视觉模型很容易崩。
+
+但当 VLA 继承一个互联网规模训练过的 Gemini Vision Encoder 后，模型已经见过极其丰富的视觉世界，很多视觉泛化能力直接来自 Foundation Model，而不需要机器人团队重新研究。
+
+这就是大基座模型真正的意义：**机器人不必重新学习所有视觉和常识。**
+
+## 34. 这也解释了为什么不同机器人团队对“难题”的认知可能完全不同
+
+如果团队从头训练视觉模型、使用较弱开源 Backbone、数据规模较小，它可能会认为 Visual Generalization 是核心科研问题。
+
+拥有 Gemini / GPT 级视觉基座的团队则可能认为这已经不是问题。
+
+因此不同公司关于“机器人最难的是什么”的争论，有时不是理论分歧，而是他们手里的 Foundation Model 起点完全不同。
+
+## 35. 机器人最终是系统问题，很难靠一篇“神论文”解决
+
+机器人同时包含感知、认知、语言、推理、World Model、Planning、Motor Control、Hardware、Tactile、Data、Simulation、Cross-Embodiment、Safety 和 Deployment。
+
+很难存在一个算法突然把所有问题解决。
+
+如果一定只能选一个当前最优先的问题，谭捷仍然选择：**如何获得高质量、大规模、可扩展的机器人数据。**
+
+---
+
+# 三、清洗编辑版长篇访谈稿
+
+## 第一章：从计算机图形学走到机器人
+
+**张小珺：** 先介绍一下你的研究经历。为什么一个做计算机图形学的人最终进入机器人？
+
+**谭捷：** 我本科在上海交大，博士阶段去 Georgia Tech 做计算机图形学，也在 Pixar 实习过。
+
+我当时研究的是 Physics-based Character Animation。传统动画可以靠动画师手工调动作，但研究里更关心的是：能不能用物理模型、优化和控制，让一个虚拟的人或者动物自己走路、运动。
+
+做着做着，我越来越觉得，这和机器人非常像。
+
+图形学是在 Simulation 里让一个身体运动；机器人是在真实世界里让一个身体运动。你甚至可以说，机器人是在真实世界里做图形学。
+
+当时仿真中的 Character 已经可以跑、跳甚至做复杂动作，而真实机器人还很笨。DARPA Robotics Challenge 里的机器人连走坡、开门、转阀门都经常失败。
+
+我就想，如果 Simulation 里的这些方法能迁移到真实机器人，可能会带来很大变化。
+
+## 第二章：第一次 Paradigm Shift——RL + Sim-to-Real
+
+**张小珺：** 这个判断后来什么时候被验证？
+
+**谭捷：** 我加入 Google 后做的第一批重要工作就是 Sim-to-Real。
+
+2018 年那篇《Sim-to-Real: Learning Agile Locomotion for Quadruped Robots》使用 Deep Reinforcement Learning 在 Simulation 中训练四足机器人，然后迁移到真实机器上。
+
+核心问题是 Reality Gap。
+
+仿真里电机和真实电机不一样，延迟不同，摩擦不同，质量参数也不完全准确。所以我们通过系统辨识、执行器建模、Latency Simulation、Domain Randomization 等方式缩小差异。
+
+现在大家看到四足、人形机器人跑跳、翻滚，会觉得理所当然。但十年前，学术界很难做到。
+
+后来 RL + Sim-to-Real 基本成为 Locomotion 的标准路线。我认为这是过去十年机器人第一个明显的范式迁移。
+
+## 第三章：第二次 Paradigm Shift——大模型给机器人装上“大脑”
+
+**张小珺：** 大语言模型出现以后，机器人发生了什么变化？
+
+**谭捷：** 在大模型之前，机器人最擅长的是底层控制，比如怎么走路、怎么保持平衡、怎么规划一条不碰撞的机械臂轨迹。
+
+但它不理解自然语言，也没有 Common Sense。
+
+你让机器人“帮我做杯咖啡”，它甚至不知道这个任务包含什么步骤。
+
+今天如果问 Gemini“做咖啡需要什么步骤”，它可以自动拆解成一系列计划。
+
+所以 Foundation Model 给机器人补上的，是认知和常识。
+
+如果用人来类比，大模型更像大脑，负责理解、推理和规划；强化学习更像小脑，负责平衡、运动和操作执行。最终两部分都需要。
+
+## 第四章：机器人基础模型是不是独立学科？
+
+**张小珺：** 国内有人认为机器人 Foundation Model 不应该是 LLM 或 VLM 的分支，而应该形成一个独立基础模型。你怎么看？
+
+**谭捷：** 我觉得现在还没有走到那一步。
+
+最近几年机器人智能进步，很大程度来自 Multimodal Foundation Model。
+
+VLM 已经拥有视觉、语言、常识、语义和一定的推理，它缺少的主要是一件事情：**Robot Action Output。**
+
+所以现在很多 VLA 的基本做法，仍然是在强 VLM 基础上加入机器人动作数据，使模型能够从图像和语言直接预测 Action。
+
+未来如果遇到新的瓶颈，比如机器人需要完全不同的 Data Format、World Model 或 Architecture，它可能会变成更独立的领域。
+
+但 So far, not yet。
+
+## 第五章：机器人现在到了 GPT 的哪个阶段？
+
+**张小珺：** 如果把机器人发展类比 GPT，现在大概是什么阶段？
+
+**谭捷：** 很难严格对应。
+
+我觉得现在已经出现足够多的 Sign of Life。我们知道如果继续 Scale 当前 Training Recipe，能力应该继续增长。
+
+但离真正稳定可用还有明显差距。
+
+简单 Pick-and-Place 可以做到很高成功率，但稍微复杂一点，例如拉拉链，需要非常精确的接触和方向控制，成功率可能只有三四成。
+
+三四成在论文视频里可以展示，但现实产品完全不可用。
+
+所以我认为还需要几年的持续突破，才会出现一个大家明显觉得“这个东西真的有用”的时刻。
+
+## 第六章：Demo 距离产品可以差十年
+
+**张小珺：** 为什么论文里已经这么惊艳，实际落地还需要这么久？
+
+**谭捷：** 研究原型和产品完全不是同一个东西。
+
+做 Paper 时，你可以控制环境、起始姿态、任务、物体、光照等大量条件。
+
+从 Paper 到敢做 Live Demo，可能都需要一两年。
+
+再从 Live Demo 到真正 Product Deployment，五到十年并不奇怪。
+
+自动驾驶就是最明显的例子。
+
+所以机器人今天已经出现很多令人惊艳的 Demo，不代表家庭机器人明年就会普及。
+
+## 第七章：Specialist 还是 Generalist？
+
+**张小珺：** 自动驾驶已经这么难，机器人为什么不一个垂直领域一个垂直领域地解决？为什么一定追求通用人形？
+
+**谭捷：** 我觉得两条路线都可以成立。
+
+一种是先做一个明确 Vertical，让它真正落地；另一种是直接追求 General-purpose Humanoid。
+
+技术上没有绝对对错。
+
+但大语言模型给了大家一个非常强的心理参照。以前 NLP 也有翻译模型、问答模型、分类模型，后来 Generalist Model 一旦真正成立，那些 Specialist 在很多领域都很难竞争。
+
+所以今天很多人相信机器人也会发生同样的变化。
+
+## 第八章：为什么最近两年机器人突然变快？
+
+**张小珺：** 为什么 2024—2025 这段时间大家明显感觉机器人进展加速？
+
+**谭捷：** 第一是 VLM 本身快速发展。Gemini、GPT 这类模型的视觉、语言和 Reasoning 能力不断提高。
+
+第二是 Thinking Model。Inference-time Compute 允许模型在输出答案前使用更多 Token 做推理，这种能力也开始进入机器人。
+
+第三是整个行业的投入完全变了。ChatGPT 之后，各家公司突然意识到 Robotics 可能是下一个巨大的 AI Frontier，于是人变多、算力变多、数据投入变多，CEO 也更重视。
+
+同时竞争也变得非常激烈。
+
+## 第九章：真正卡住机器人的是数据
+
+**张小珺：** 那么距离真正的机器人 GPT Moment，最缺的是什么？
+
+**谭捷：** 我最明显看到的是 Data。
+
+LLM 的数据基本来自互联网。Robotics 不一样。
+
+机器人处在 Unstructured Environment 中，几乎任何事情都可能发生。模型需要的不是几百种句子，而是现实世界中巨大状态空间的 Coverage。
+
+现在的数据量根本没有 Saturate Model Capacity，所以我甚至还不知道第二大瓶颈是什么。也许未来是 Architecture，但首先得把 Data Scale 上去。
+
+## 第十章：机器人数据金字塔
+
+**张小珺：** 那机器人到底应该吃什么数据？
+
+**谭捷：** 我比较喜欢“Data Pyramid”这个概念。
+
+最底层是量最大的数据：互联网视觉和语言数据。
+
+再往上是 Human Video，特别是 Egocentric Video。人只需要戴一个 Camera，就可以记录大量真实任务。它非常便宜，但 Human Body 和 Robot Embodiment 不一样，所以怎样有效利用还没有完全解决。
+
+再往上是 Simulation、Synthetic Data。
+
+最上面才是针对特定机器人的高质量 Demonstration，例如这个具体双臂机器人如何拧开一个瓶盖。
+
+越往上越贵、越难 Scale，但对最终 Motor Control 越直接。整座金字塔都重要。
+
+## 第十一章：Gemini Robotics 1.5 为什么加入 Thinking
+
+**张小珺：** 说回 Gemini Robotics 1.5，你觉得最重要的变化是什么？
+
+**谭捷：** 第一是 Thinking。
+
+以前 VLA 很直接：图像 + 指令进来，Action 出去。
+
+现在我们希望机器人在动作之前能够 Reason。
+
+比如你要求“把衣服按照颜色分类”，机器人应该先判断这是什么颜色、应该放到哪一组、下一步该拿哪件。
+
+复杂任务必须被拆成很多小步骤。如果完全依赖一个 Reflex-like Policy，很难做很长的任务。
+
+## 第十二章：ER + VLA 的快慢系统
+
+**张小珺：** 你们为什么不是直接做一个完全统一的大模型？
+
+**谭捷：** 因为今天的计算条件还不允许。
+
+我们现在有两个部分。
+
+一个是 Embodied Reasoning Model。它可以慢慢想，甚至调用 Search、Calendar、Weather、Code。
+
+例如你让机器人帮你打包旅行行李，它可以先查目的地天气、行程，再提出一个 Plan。
+
+另一个是 VLA。VLA 负责真正执行，需要很快。机器人控制可能每秒做多次决策。
+
+一个非常大的 Reasoning Model 很难以这个频率实时执行，所以现在是 Slow Thinking 和 Fast Acting 分开。
+
+## 第十三章：这个分层系统是终局吗？
+
+**张小珺：** 所以你认为机器人最终会一直是 Planner + VLA 吗？
+
+**谭捷：** 我目前更倾向它是过渡状态。
+
+如果计算资源足够，我觉得 Unified Model 可能更理想。
+
+因为两个模型之间必须有 Interface。今天 ER 和 VLA 很大程度通过 Language Communication。
+
+语言是很低带宽的。高层模型内部形成的丰富 Representation，如果必须先压缩成一句文本再交给低层，就会丢失很多信息。
+
+统一模型内部可以使用更高带宽的 Representation。
+
+但今天计算还不允许，所以分层非常合理。
+
+## 第十四章：为什么他长期仍然偏向端到端
+
+**张小珺：** 你一直偏 End-to-End 吗？
+
+**谭捷：** 其实不是。
+
+我早期做 RL 时也觉得纯强化学习太难。Reward 很难调，PPO 训练效率又不高。
+
+所以我们曾经尝试传统 Controller 已经能工作，再让 RL 调少量参数。短期看效果非常好。
+
+但几年以后，整个领域还是走向 State-in, Action-out 的 End-to-End RL。
+
+很多 Hybrid Module 最终被学习系统吸收了。这段历史让我更倾向认为，VLA 也可能经历类似过程。
+
+## 第十五章：第二个突破——Cross-Embodiment
+
+**张小珺：** Gemini Robotics 1.5 另一个重要结果是什么？
+
+**谭捷：** Cross-Embodiment Transfer。
+
+机器人之间差别非常大。假设 ALOHA 学过一个任务，但 Apollo 没有学过，传统方案里 Apollo 可能必须重新采这个任务的数据。
+
+我们希望通过 Multi-Embodiment Training，让不同机器人共享经验。
+
+Gemini Robotics 1.5 里面我们有一个方法叫 Motion Transfer。它不只是把不同机器人的数据简单放在一起，还需要 Architecture 和 Training Recipe 的调整。
+
+## 第十六章：Motion Transfer 的边界
+
+**张小珺：** 那是不是以后拿来任何一个新机器人都可以直接 Zero-shot？
+
+**谭捷：** 不是。
+
+我们目前展示的重点是：如果一个机器人没有见过某个 Task，但另一个训练中的机器人见过，那么它可以从其他 Embodiment 学到这项任务知识。
+
+不是说完全没见过的新机器人什么数据都不需要。
+
+跨本体迁移的效果也取决于 Embodiment Gap。双臂夹爪之间容易一些，单臂到双臂、夹爪到五指灵巧手，就困难很多。
+
+## 第十七章：为什么目标本体数据越少，Motion Transfer 越有价值
+
+**张小珺：** 哪些机器人最能受益？
+
+**谭捷：** 如果目标机器人已经有海量数据，那么其他 Embodiment 给它的增益可能不大。
+
+但例如 Humanoid 数据特别贵。如果你在 ALOHA 上有非常多的数据，人形机器人自己只有少量数据，那么迁移价值会明显放大。
+
+这也是 Cross-Embodiment 对解决 Data Bottleneck 很重要的原因。
+
+## 第十八章：机器人作为 Physical Agent
+
+**张小珺：** 论文标题为什么说“把 AI Agent 带进物理世界”？
+
+**谭捷：** Robot 本身就是 Physical Agent。
+
+Agent 不只是回答问题，而要 Decision、Tool Use、Action 和 Environment Interaction。
+
+我们的 Embodied Reasoning Model 可以使用工具，比如搜索、写代码、查询信息，然后把高层决策传给 VLA，再真正改变物理世界。
+
+这就是 Digital Agent 与 Physical Agent 的连接。
+
+## 第十九章：Teleoperation 不可能是终极数据方案
+
+**张小珺：** 当前真实机器人数据主要怎么采？
+
+**谭捷：** 很多依靠 Teleoperation，但成本非常高。
+
+你需要 Operator、Robot、场地、Maintenance、Data Infrastructure。
+
+如果未来需要百万小时甚至更大的机器人数据，完全依靠人遥操很难想象。
+
+所以长期必须让昂贵的 Robot Demonstration 占比下降，让更便宜、更可扩展的数据比例上升。
+
+## 第二十章：为什么 Real Data 不等于 Better Generalization
+
+**张小珺：** 国内经常说 Real Data 泛化更好。
+
+**谭捷：** Real Data 最大好处是没有 Sim-to-Real Gap。
+
+但 Generalization 是 Coverage 的问题。
+
+你只采一个厨房的数据，它不会自动泛化到全世界的厨房。
+
+无论真实还是合成，如果 Distribution 足够丰富，才能获得更好泛化。
+
+所以核心不是 Real or Sim，而是 Coverage、Diversity、Quality、Scale。
+
+## 第二十一章：未来的 Simulation 可能不再只是物理引擎
+
+**张小珺：** 你说 Simulation 时，指 MuJoCo 这些吗？
+
+**谭捷：** 以前大家说 Simulation，通常确实是 Bullet、MuJoCo、Isaac，本质是在计算机里解物理方程。
+
+但 Video Generation 出现以后，这个定义开始变化。
+
+如果 VEO 这种模型可以生成物理上合理的未来，而且最终还能接受 Action 控制，那它也是一种 Simulation。
+
+传统仿真需要 Designer 手工创建大量资产；生成式模型只需要 Prompt，就可能产生数百种家庭和物体。这是很不一样的 Scaling 方式。
+
+## 第二十二章：Video Model 到 World Model 还差什么？
+
+**张小珺：** 那 VEO、Sora 已经是世界模型了吗？
+
+**谭捷：** 我现在还不会这么叫。
+
+真正的机器人 World Model 应该满足：给当前状态，再给一个机器人 Action，可以预测下一时刻状态。
+
+今天很多 Video Model 是一次生成一个 Clip，用户无法在每个时间步输入新的动作，实时改变未来。
+
+当视频模型真正变成 Action-conditioned、Interactive、Closed-loop，它会更接近 World Model。
+
+## 第二十三章：Scalable Data 是他真正的 Bet
+
+**张小珺：** 你属于仿真派吗？
+
+**谭捷：** 我更愿意说我是 Scalable Data 派。
+
+Simulation 是一种，Human Video 是一种，Egocentric Video 是一种，Generative Model 产生的数据也可以是一种。
+
+共同特征是：你可以利用 Compute 把 Data Scale 上去。
+
+真实机器人 Teleoperation 需要真实的人和设备，线性成本太高。我很难相信机器人最终完全靠 Teleoperation 解决。
+
+## 第二十四章：Data Quality 仍然是开放问题
+
+**张小珺：** Data Foundry 采的数据怎么判断好不好？
+
+**谭捷：** 这是现在非常现实的问题。
+
+目前机器人领域并没有一个通用 Data Quality Metric。
+
+研究员会看轨迹是否抖、是否 Smooth、有没有重复、成功率如何，但很多判断还很主观。
+
+所以 Data Foundry 数据如果训练效果不好，很容易出现双方互相认为是对方的问题。
+
+这本身就是科研问题。
+
+## 第二十五章：数据重要，但 Architecture Innovation 也不可缺
+
+**张小珺：** 有人认为大家太关注数据，忽视模型架构。
+
+**谭捷：** Architecture 很重要。Motion Transfer 本身就包含 Architecture 和 Algorithm Innovation。
+
+但如果没有 Data Coverage，再聪明的 Architecture 也不可能凭空产生没有见过的世界经验。
+
+所以不是二选一。“大力”很重要，但“大力”本身也不够。
+
+## 第二十六章：触觉为什么迟早会回来
+
+**张小珺：** 机器人最终是不是只靠 Vision？
+
+**谭捷：** 在当前夹爪时代，我觉得视觉真的可以解决绝大多数问题。
+
+ALOHA 给我最大的冲击之一，就是只靠视觉也能完成一些很精细的双臂操作。
+
+但如果未来进入 Dexterous Hand，我觉得 Tactile 会非常重要。
+
+你需要知道有没有滑、接触力多大、是否卡住、是否真正抓稳。
+
+所以过去觉得 Tactile 不重要，很可能是因为硬件能力还没走到那里。
+
+## 第二十七章：Human Video Learning 和 Pure Vision Control 不应该混为一谈
+
+**张小珺：** 马斯克说机器人以后可以看 YouTube 学技能，你认同吗？
+
+**谭捷：** 完全认同机器人应该看大量 Human Video，因为这是一种非常 Scalable 的数据。
+
+但“通过视觉学习任务”和“执行时所有问题只需要视觉”是两个完全不同的命题。
+
+未来 Manipulation 特别是灵巧手，触觉仍然可能必不可少。
+
+## 第二十八章：Humanoid 是最值得押注的单一本体
+
+**张小珺：** 未来机器人本体会不会收敛？
+
+**谭捷：** 不会只有一种机器人。
+
+但如果只能 Bet 一种，我会选 Humanoid。
+
+原因不是它最容易做，而是现实环境本身是为人设计的。
+
+如果最终目标是 Physical AGI，希望机器人能做人能做的大量事情，那么接近人类的身体结构具有很强优势。
+
+## 第二十九章：Physical AGI 和商业落地是两套目标函数
+
+**张小珺：** 那是不是所有公司都应该做 Humanoid Generalist？
+
+**谭捷：** 不是。
+
+如果你在 Google 这种公司，目标可以是几十年尺度的 Physical AGI。
+
+Startup 必须活下来。你可能需要先找到一个商业 Vertical，例如物流、制造、布料操作、仓储。
+
+先产生收入和真实部署，再利用数据飞轮向更通用能力扩张。
+
+路线取决于组织和资本条件。
+
+## 第三十章：为什么 Google Robotics 变成“大兵团”
+
+**张小珺：** 你加入 Google 时和现在的组织有何不同？
+
+**谭捷：** 我加入 Google Brain Robotics 时，只有十个人左右。
+
+每个研究员都很独立。这种文化很自由，但你的 Impact 也很有限。
+
+Gemini Robotics 这种项目则需要一百多人协作。
+
+有人负责 Research、Infra、Data、Evaluation、Robot、Maintenance。
+
+Foundation Model 已经不是一个 Researcher 单打独斗可以完成的项目。
+
+## 第三十一章：Top-down 的 What，Bottom-up 的 How
+
+**张小珺：** Google 现在是自上而下还是自下而上？
+
+**谭捷：** 两种都有。
+
+Gemini Robotics 这种大项目必须 Top-down，要有 Direction、Timeline、Resource Coordination。
+
+但 Research Idea 很多来自 Bottom-up。
+
+例如 Motion Transfer。上层目标是“解决 Multi-Embodiment Data”，这就是 What；至于怎么解决，会有多个 Research Team 自己尝试不同方法。
+
+Motion Transfer 最终整合了多个小组的想法。
+
+## 第三十二章：基础模型改变了机器人研究问题本身
+
+**张小珺：** 强 Foundation Model 会怎样改变机器人研究？
+
+**谭捷：** 举一个例子。
+
+以前 Visual Generalization 是很大的难题。换一个背景、颜色、光线，Policy 就可能失败。
+
+但 Gemini Vision Encoder 已经通过互联网规模预训练见过极其丰富的视觉世界。
+
+很多 Visual Generalization 能力直接继承过来了。
+
+所以同一个问题，对从头训练机器人模型的人可能是核心难题；对使用超强 Foundation Model 的团队可能已经近似“免费解决”。大家看待 Robotics 的方式自然会不同。
+
+## 第三十三章：什么时候会出现 Generalist Robot？
+
+**张小珺：** 未来五到十年你怎么判断？
+
+**谭捷：** 我个人认为，未来两三年可能会出现明显的 GPT Moment。
+
+大家会意识到：General-purpose Robot 真的要来了。
+
+五年左右，有泛化能力的机器人可能开始在物流、制造、商业环境落地。
+
+进入家庭会更慢。
+
+十年尺度上，家庭机器人可能开始真正广泛产生价值。
+
+当然这只是我当时的判断。
+
+## 第三十四章：从 Automation 到 Superhuman
+
+**张小珺：** 通用机器人最终会经历哪些阶段？
+
+**谭捷：** 我会分成几类。
+
+第一阶段是 Automation：固定 Robot、固定 Program、固定 Trajectory。
+
+第二阶段是 Teleoperation：机器人身体很强，但主要由人控制。
+
+第三阶段是 Narrow Generalist：它有自主智能，但只在某个 Domain。自动驾驶可以作为类比。
+
+第四阶段是真正 Generalist：可以在家庭和开放环境做大量任务。
+
+最后是 Superhuman Capability：机器人可能利用强化学习、机械身体和计算系统，在某些方面超过人类。
+
+## 第三十五章：如果只能选一个当前最重要的问题
+
+**张小珺：** 如果只能定义一个机器人最需要解决的问题，你选什么？
+
+**谭捷：** Robotics 是一个极其复杂的系统问题，很难靠单一突破彻底解决。
+
+但如果今天一定只能选一个，我还是会选：**怎样获得高质量、规模足够大、而且能够持续扩展的数据。**
+
+这是现在最明显的 Bottleneck。
+
+---
+
+# 四、从 VLA / 数据质检 / 机器人学习视角再解读
+
+## 1. “数据第一”并不是“数据量第一”
+
+谭捷实际上反复强调四个维度：**Scale × Diversity × Coverage × Quality**。
+
+只增加 Episode 数量并不够。如果所有数据都来自同一环境、同一任务、同一操作者、同一成功模式，模型仍然没有真正获得开放世界泛化。
+
+## 2. Data Quality 之所以难，是因为它最终要通过 Policy Utility 定义
+
+普通 CV 数据可以检查图像清晰度和标签正确率。
+
+Robot Demonstration 的价值更复杂。
+
+一个看起来“不平滑”的轨迹，有时可能包含 Recovery、Contact Adjustment、Failure Correction，这些恰恰可能对 Closed-loop Policy 极有价值。
+
+因此机器人数据质检不能只做“像不像完美 Demonstration”，而应逐渐转向：**这段数据是否提高某类 Policy Capability。**
+
+## 3. Cross-Embodiment 本质上是机器人领域的数据复用问题
+
+Motion Transfer 的真正价值并不只是模型可以控制三种机器人。
+
+更关键的是：以前每个 Embodiment 都对应一个独立数据孤岛。
+
+Cross-Embodiment Foundation Model 希望实现：**Data from Robot A → Capability of Robot B。**
+
+一旦成立，人形机器人的训练数据不再只能来自昂贵的人形 Teleoperation，这会从根本上改变数据经济学。
+
+## 4. ER + VLA 与 Planner + Policy 是同一个系统抽象
+
+从工程角度，可以把 Gemini Robotics 1.5 理解为：
+
+### Upper Layer：Gemini Robotics-ER
+输出 Plan、Subgoal、Semantic Decision、Tool Result。
+
+### Lower Layer：Gemini Robotics VLA
+输入 Visual Observation、Language / Subgoal、Robot State，输出 Action。
+
+因此 VLA 完全可以理解为一种 Policy 实现。复杂长任务仍然可以由上层 Planner 驱动多个 VLA Subtask。
+
+## 5. “未来 Unified”不意味着 Planner 消失
+
+真正统一以后，Planner 和 Policy 仍可能作为模型内部的不同计算模式存在。
+
+所以架构上的 **Two Models → One Model**，不等于功能上的 **Planning → Disappear**。
+
+更可能是 Planner 被吸收到统一网络内部。
+
+## 6. World Model 最重要的不是视频逼真度，而是 Intervention
+
+机器人需要的 World Model 必须回答：**如果我做这个 Action，世界会怎样变化？**
+
+因此核心是 Action-conditioned Counterfactual Prediction。
+
+如果只会生成一个看起来真实的视频，却不能响应 Agent Action，它对闭环控制的价值有限。
+
+## 7. 谭捷路线与 Physical Intelligence 路线的核心差异
+
+两者都做 Generalist VLA，但倾向略不同。
+
+### Physical Intelligence
+更强调 Large-scale real robot data、VLA Policy、Action Expert、Real-world deployment、Post-training / RL。
+
+### Google DeepMind
+更强调完整数据金字塔：Internet VLM Pretraining、Human Video、Cross-Embodiment、Simulation、World Model、Robot Data、ER + VLA、Motion Transfer。
+
+可以粗略理解为：
+
+PI 更像从 **Robot Policy + Real Experience** 向外扩张；
+
+DeepMind 更像从 **Gemini Foundation Model + Multi-source Scalable Data** 向物理世界下沉。
+
+两者正在逐渐汇合，而不是完全对立。
+
+---
+
+# 五、截至 2026 年 8 月回看
+
+这部分不是原访谈内容，而是基于访谈之后公开进展做的时间校正。
+
+## 1. Cross-Embodiment 没有被放弃，反而继续成为主线
+
+截至 2026 年 8 月，Google DeepMind 已经推出 Gemini Robotics 2。
+
+官方明确表示，新一代 On-Device 模型原生支持 Multi-Embodiment，并继承 Gemini Robotics 1.5 的 Motion Transfer 技术。
+
+对新的双臂机器人本体，可以利用少量示例在较短时间内完成适配。
+
+这说明访谈里强调的 Cross-Embodiment 并不是一次性实验，而已经成为 DeepMind Robotics 的连续技术路线。
+
+## 2. Whole-body Humanoid Control 也向前走了一步
+
+访谈中谭捷反复强调：Locomotion 已经很强，Manipulation 才是真正难题；长期目标则是把全身控制和操作统一起来。
+
+Gemini Robotics 2 已经进一步展示 Walking、Crouching、Stretching、Manipulation 和 Whole-body Coordinated Control。
+
+这与访谈中“最终统一更大的 Physical Agent Model”的方向高度一致。
+
+## 3. 但这不意味着 2025 年的数据瓶颈已经解决
+
+即使 Gemini Robotics 2 能做更复杂的全身任务，DeepMind 仍然持续强调 Adaptation、Multi-Embodiment、Data、Simulation 和 Generalization。
+
+也就是说，模型能力进步很快，但“怎样获得足够大且覆盖开放世界的数据”仍然没有消失。
+
+---
+
+# 六、资料来源与可靠性说明
+
+主要依据：
+
+1. 《张小珺Jùn｜商业访谈录》第 121 期官方节目及时间轴，2025-11-28，约 2 小时 06 分。
+2. “语言即世界 language is world”发布的正式文字版本及完整转载镜像《独家对话 DeepMind 谭捷：机器人、世界模型与 Google》，正文约 1200 行。
+3. Google DeepMind 官方文章《Gemini Robotics 1.5 brings AI agents into the physical world》。
+4. 技术报告《Gemini Robotics 1.5: Pushing the Frontier of Generalist Robots with Advanced Embodied Reasoning, Thinking, and Motion Transfer》。
+5. Google DeepMind 官方 RT-2 技术介绍。
+6. Open X-Embodiment / RT-X 官方资料与论文。
+7. 谭捷等人的《Sim-to-Real: Learning Agile Locomotion for Quadruped Robots》。
+8. ALOHA 论文《Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware》，用于核对访谈中的视觉双臂操控背景。
+9. Google DeepMind 2026 年 Gemini Robotics 2 官方资料，仅用于文末后续回看，没有混入原始访谈内容。
+10. 谭捷个人主页，用于校正当前职务和研究方向。
+
+---
+
+# 七、一句话概括
+
+> **VLA 让机器人第一次看到了 Foundation Model 的 Scaling 路径，但真正决定 Physical AGI 能否复制 LLM 奇迹的，不只是再造一个更大的模型，而是能否把互联网数据、人类视频、仿真、世界模型、跨本体数据和少量高价值真实机器人数据组成一个真正可扩展的数据系统。**
